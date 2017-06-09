@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html ng-app = "myApp">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Get Pointcloud </title>
+  <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+  <script src="node_modules/angular/angular.min.js"> </script>
+  <script src="/node_modules/angular-aria/angular-aria.js"></script>
+  <script src="/node_modules/angular-animate/angular-animate.js"></script>
+  <script src="/node_modules/angular-material/angular-material.js"></script>
+</head>
+<body ng-controller="AppCtrl">
+  <div ng-cloak>
+    <md-content>
+      <md-tabs md-dynamic-height md-border-bottom>
+        <md-tab label="SFM">
+          <md-content class="md-padding">
+            <h2 class="md-display-1"> Get Pointcloud by Structure From Motion </h2>
+            <input type = "file" accept="image/*" file-model = "myFile" multiple="multiple"/>
+            <md-button class="md-raised md-primary" ng-click = "uploadFile()">upload me</md-button>
+            <md-button class="md-raised" ng-click = "renew()"> New pointcloud </md-button>
+            <div layout = "row" layout-align = "space-around none" ng-show="filesName.length > 0">
+              <div>
+                <h3> List of images </h3>
+                <h4 ng-repeat = "file in filesName"> {{file}}</h4>
+              </div>
+              <div >
+                <form name="getPointcloudForm">
+                  <div layout="row" layout-align="center">
+                    <md-input-container>
+                      <label> Focal camera </label>
+                      <input type ="number" min = "0" required name="focalCamera" ng-model="pointcloud.focal">
+                    </md-input-container>
+                    <md-input-container>
+                      <label> cx: center of projection coordinates </label>
+                      <input type ="number" min = "0" required name="cx" ng-model="pointcloud.cx">
+                    </md-input-container>
+                    <md-input-container>
+                      <label> cy: center of projection coordinates </label>
+                      <input type ="number" min = "0" required name="cy" ng-model="pointcloud.cy">
+                    </md-input-container>
+                  </div>
+                  <div layout = "row" layout-align="center">
+                    <md-button class = "md-raised md-primary" ng-disabled="getPointcloudForm.$invalid || dataLoading" ng-click ="getPointCloud(pointcloud)"> Get PointCloud</md-button>
+                    <div ng-show="dataLoading">
+                      <p> Please wait... </p>
+                    </div>
+                  </div>
+                  <a ng-show="showDownload" href="/pointcloud.txt" target = "_blank" download='pointcloud.txt'> Download old pointcloud file </a>
+                </form>
+              </div>
+            </div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Slam">
+          <md-content class="md-padding">
+          </md-content>
+        </md-tab>
+      </md-tabs>
+    </md-content>
+  </div>
+
+  <script src="javascripts/controller.js"></script>
+</body>
+</html>
