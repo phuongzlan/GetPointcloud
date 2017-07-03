@@ -44,10 +44,19 @@ app.service('fileUpload', ['$http', function ($http) {
       return $http.get('/getPointcloudFile');
     }
  }]);
+ app.service('cornersService',['$http', function($http) {
+   this.getCorners = function(corner) {
+     return $http.post('/getCorners', corner);
+   }
+ }]);
 
-app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, fileUpload, $timeout){
+app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', 'cornersService', function($scope, fileUpload, $timeout, cornersService){
   $scope.filesName = [];
-  $scope.dataLoading = false;
+  $scope.dataLoadingSFM = false;
+  $scope.dataLoadingCorners = false;
+  $scope.dataLoadingBooks = false;
+  $scope.hasCorners = false;
+  $scope.hasBooks = false;
   $scope.pointcloud = {
     focal: null,
     cx: null,
@@ -63,7 +72,6 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
     }, function(err){
   });
 
-
   fileUpload.getListFile()
     .then(function(result){
       $scope.filesName = result.data;
@@ -72,7 +80,7 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
     });
   $scope.uploadFile = function(){
      var files = $scope.myFile;
-     var uploadUrl = "/upload";
+     var uploadUrl = "/uploadToGetPointCloud";
      fileUpload.uploadFileToUrl(files, uploadUrl)
      .then(function(result){
        angular.forEach(files, function(item){
@@ -84,12 +92,13 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
        console.log(err);
      });
   };
+
   $scope.renew = function(){
       fileUpload.removeFile()
         .then(function(result) {
           console.log('ok remove');
           $scope.filesName = [];
-          $scope.dataLoading = false;
+          $scope.dataLoadingSFM = false;
           $scope.pointcloud = {
             focal: null,
             cx: null,
@@ -101,7 +110,7 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
         });
   }
   $scope.getPointCloud = function(pointcloud){
-      $scope.dataLoading = true;
+      $scope.dataLoadingSFM = true;
       console.log(pointcloud);
       fileUpload.getPL(pointcloud)
         .then(function(result){
@@ -112,7 +121,7 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
                  target: '_blank',
                  download: 'pointcloud.txt'
             })[0].click();
-            $scope.dataLoading = false;
+            $scope.dataLoadingSFM = false;
         }, function(err){
             console.log(err);
             function getPLFile(){
@@ -130,7 +139,7 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
                     }else{
                       alert(result.data.errMes);
                     }
-                    $scope.dataLoading = false;
+                    $scope.dataLoadingSFM = false;
                   }else{
                     $timeout(function(){
                         getPLFile();
@@ -142,4 +151,46 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', function($scope, 
           getPLFile();
         });
   }
- }]);
+  $scope.corner = {
+    maxCorners : null,
+    quality_level : null,
+    min_distance : null
+  }
+   $scope.uploadToGetCorners = function(corners){
+      var files = $scope.myFile;
+      $scope.dataLoadingCorners = true;
+      var uploadUrl = "/uploadToGetCorners";
+      fileUpload.uploadFileToUrl(files, uploadUrl)
+      .then(function(result){
+        cornersService.getCorners(corners)
+         .then(function(){
+           $scope.hasCorners = true;
+          // $scope.outputCornersUrl = "";
+           $scope.outputCornersUrl = "output/corners.jpg?_ts=" + new Date().getTime();
+           $scope.dataLoadingCorners = false;
+         }, function(err) {
+           console.log(err);
+           $scope.dataLoadingCorners = false;
+         })
+      }, function(err){
+        console.log(err);
+        $scope.dataLoadingCorners = false;
+      });
+   };
+   $scope.uploadToFindBooks = function(){
+      var files = $scope.myFile;
+      $scope.dataLoadingBooks = true;
+      var uploadUrl = "/uploadToFindBooks";
+      fileUpload.uploadFileToUrl(files, uploadUrl)
+      .then(function(result){
+           $scope.hasBooks = true;
+        //   $scope.ouputBooksUrl = "";
+           $scope.ouputBooksUrl = "output/books.jpg?_ts=" + new Date().getTime();
+           $scope.dataLoadingBooks = false;
+      }, function(err){
+        console.log(err);
+        $scope.dataLoadingBooks = false;
+      });
+   };
+
+}]);

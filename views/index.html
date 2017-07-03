@@ -44,14 +44,62 @@
                     </md-input-container>
                   </div>
                   <div layout = "row" layout-align="center">
-                    <md-button class = "md-raised md-primary" ng-disabled="getPointcloudForm.$invalid || dataLoading" ng-click ="getPointCloud(pointcloud)"> Get PointCloud</md-button>
-                    <div ng-show="dataLoading">
+                    <md-button class = "md-raised md-primary" ng-disabled="getPointcloudForm.$invalid || dataLoadingSFM" ng-click ="getPointCloud(pointcloud)"> Get PointCloud</md-button>
+                    <div ng-show="dataLoadingSFM">
                       <p> Please wait... </p>
                     </div>
                   </div>
                   <a ng-show="showDownload" href="/pointcloud.txt" target = "_blank" download='pointcloud.txt'> Download old pointcloud file </a>
                 </form>
               </div>
+            </div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Detecting Corners">
+          <md-content class="md-padding">
+            <h2 class="md-display-1"> Detecting Corners </h2>
+            <form name="getCornersForm">
+              <input type = "file" accept="image/*" file-model = "myFile" />
+              <div layout="row" layout-align="center">
+                <md-input-container>
+                  <label> Maximun Corners </label>
+                  <input type ="number" min = "0" required name="maxCorners" ng-model="corner.maxCorners">
+                </md-input-container>
+                <md-input-container>
+                  <label> Quality level </label>
+                  <input type ="number" min = "0" required name="quality_level" ng-model="corner.quality_level">
+                </md-input-container>
+                <md-input-container>
+                  <label> Min distance </label>
+                  <input type ="number" min = "0" required name="min_distance" ng-model="corner.min_distance">
+                </md-input-container>
+              </div>
+              <div layout = "row" layout-align="center">
+                <md-button class="md-raised md-primary" ng-disabled="getCornersForm.$invalid || dataLoadingCorners" ng-click = "uploadToGetCorners(corner)"> Get Corners </md-button>
+                <div ng-show="dataLoadingCorners">
+                  <p> Please wait... </p>
+                </div>
+              </div>
+            </form>
+            <div layout = "row" layout-align="center">
+              <img style="max-width:100%; height:auto" ng-if="hasCorners" ng-src="{{outputCornersUrl}}">
+            </div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Finding Books">
+          <md-content class="md-padding">
+            <h2 class="md-display-1"> Finding Books </h2>
+            <form name="findingBooksForm">
+              <input type = "file" accept="image/*" file-model = "myFile" />
+              <div layout = "row" layout-align="center">
+                <md-button class="md-raised md-primary" ng-disabled="findingBooksForm.$invalid || dataLoadingBooks" ng-click = "uploadToFindBooks()"> Find Books </md-button>
+                <div ng-show="dataLoadingBooks">
+                  <p> Please wait... </p>
+                </div>
+              </div>
+            </form>
+            <div layout = "row" layout-align="center">
+              <img style="max-width:100%; height:auto" ng-if="hasBooks" ng-src="{{ouputBooksUrl}}">
             </div>
           </md-content>
         </md-tab>
