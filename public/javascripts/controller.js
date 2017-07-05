@@ -44,13 +44,29 @@ app.service('fileUpload', ['$http', function ($http) {
       return $http.get('/getPointcloudFile');
     }
  }]);
- app.service('cornersService',['$http', function($http) {
-   this.getCorners = function(corner) {
-     return $http.post('/getCorners', corner);
-   }
- }]);
 
-app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', 'cornersService', function($scope, fileUpload, $timeout, cornersService){
+app.service('cornersService',['$http', function($http) {
+ this.getCorners = function(corner) {
+   return $http.post('/getCorners', corner);
+ }
+}]);
+
+app.service('booksService',['$http', function($http) {
+ this.findBooks = function(threshold) {
+    //console.log(threshold);
+    return $http.post('/findingBooks', {threshold: threshold});
+ }
+}]);
+
+app.service('HarrisDetectorService',['$http', function($http) {
+ this.getCorners = function(threshold) {
+    //console.log(threshold);
+    return $http.post('/getHarrisDetector', {threshold: threshold});
+ }
+}]);
+
+
+app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', 'cornersService', 'booksService', 'HarrisDetectorService', function($scope, fileUpload, $timeout, cornersService, booksService, HarrisDetectorService){
   $scope.filesName = [];
   $scope.dataLoadingSFM = false;
   $scope.dataLoadingCorners = false;
@@ -183,14 +199,43 @@ app.controller('AppCtrl', ['$scope', 'fileUpload', '$timeout', 'cornersService',
       var uploadUrl = "/uploadToFindBooks";
       fileUpload.uploadFileToUrl(files, uploadUrl)
       .then(function(result){
-           $scope.hasBooks = true;
+        console.log('update findBooks success');
+        booksService.findBooks($scope.threshold)
+          .then(function(){
+            $scope.hasBooks = true;
         //   $scope.ouputBooksUrl = "";
-           $scope.ouputBooksUrl = "output/books.jpg?_ts=" + new Date().getTime();
-           $scope.dataLoadingBooks = false;
+            $scope.outputBooksUrl = "output/books.jpg?_ts=" + new Date().getTime();
+            $scope.dataLoadingBooks = false;
+          }, function(error){
+            console.log(error);
+            $scope.dataLoadingBooks = false;
+          });
       }, function(err){
         console.log(err);
         $scope.dataLoadingBooks = false;
       });
    };
+  $scope.uploadToGetHarrisDetector = function(){
+    var files = $scope.myFile;
+    $scope.dataLoadingHarrisCorner = true;
+    var uploadUrl = "/uploadToGetHarrisDetector";
+    fileUpload.uploadFileToUrl(files, uploadUrl)
+    .then(function(result){
+      console.log('update HarrisDetector success');
+      HarrisDetectorService.getCorners($scope.HarrisThreshold)
+        .then(function(){
+          $scope.hasHarrisDetector = true;
+      //   $scope.ouputBooksUrl = "";
+          $scope.outputHarrisDetectorUrl = "output/HarrisDetector.jpg?_ts=" + new Date().getTime();
+          $scope.dataLoadingHarrisCorner = false;
+        }, function(error){
+          console.log(error);
+          $scope.dataLoadingHarrisCorner = false;
+        });
+    }, function(err){
+      console.log(err);
+      $scope.dataLoadingHarrisCorner = false;
+    });
+  };
 
 }]);

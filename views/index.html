@@ -26,6 +26,7 @@
               <div>
                 <h3> List of images </h3>
                 <h4 ng-repeat = "file in filesName"> {{file}}</h4>
+                <p ng-if="(filesName.length < 2)"> You need to add more images. </p>
               </div>
               <div >
                 <form name="getPointcloudForm">
@@ -44,7 +45,7 @@
                     </md-input-container>
                   </div>
                   <div layout = "row" layout-align="center">
-                    <md-button class = "md-raised md-primary" ng-disabled="getPointcloudForm.$invalid || dataLoadingSFM" ng-click ="getPointCloud(pointcloud)"> Get PointCloud</md-button>
+                    <md-button class = "md-raised md-primary" ng-disabled="getPointcloudForm.$invalid || dataLoadingSFM || filesName.length < 2" ng-click ="getPointCloud(pointcloud)"> Get PointCloud</md-button>
                     <div ng-show="dataLoadingSFM">
                       <p> Please wait... </p>
                     </div>
@@ -91,6 +92,12 @@
             <h2 class="md-display-1"> Finding Books </h2>
             <form name="findingBooksForm">
               <input type = "file" accept="image/*" file-model = "myFile" />
+              <div layout="row" layout-align="center">
+                <md-input-container>
+                  <label> Threshold [0, 255] </label>
+                  <input type ="number" min = "0" max = "255" required name="threshold" ng-model="threshold">
+                </md-input-container>
+              </div>
               <div layout = "row" layout-align="center">
                 <md-button class="md-raised md-primary" ng-disabled="findingBooksForm.$invalid || dataLoadingBooks" ng-click = "uploadToFindBooks()"> Find Books </md-button>
                 <div ng-show="dataLoadingBooks">
@@ -99,7 +106,30 @@
               </div>
             </form>
             <div layout = "row" layout-align="center">
-              <img style="max-width:100%; height:auto" ng-if="hasBooks" ng-src="{{ouputBooksUrl}}">
+              <img style="max-width:100%; height:auto" ng-if="hasBooks" ng-src="{{outputBooksUrl}}">
+            </div>
+          </md-content>
+        </md-tab>
+        <md-tab label="Harris Detector">
+          <md-content class="md-padding">
+            <h2 class="md-display-1"> Harris Detector Corners </h2>
+            <form name="HarrisDetectorForm">
+              <input type = "file" accept="image/*" file-model = "myFile" />
+              <div layout="row" layout-align="center">
+                <md-input-container>
+                  <label> Threshold [0, 255] </label>
+                  <input type ="number" min = "0" max = "255" required name="HarrisThreshold" ng-model="HarrisThreshold">
+                </md-input-container>
+              </div>
+              <div layout = "row" layout-align="center">
+                <md-button class="md-raised md-primary" ng-disabled="HarrisDetectorForm.$invalid || dataLoadingHarrisCorner" ng-click = "uploadToGetHarrisDetector()"> Get Corners </md-button>
+                <div ng-show="dataLoadingHarrisCorner">
+                  <p> Please wait... </p>
+                </div>
+              </div>
+            </form>
+            <div layout = "row" layout-align="center">
+              <img style="max-width:100%; height:auto" ng-if="hasHarrisDetector" ng-src="{{outputHarrisDetectorUrl}}">
             </div>
           </md-content>
         </md-tab>

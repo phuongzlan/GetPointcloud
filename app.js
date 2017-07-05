@@ -96,15 +96,38 @@ app.post('/uploadToFindBooks', function(req, res, next){
   form.on('file', function(field, file) {
     fs.rename(file.path, path.join(form.uploadDir, file.name));
     findingBooksImageName = file.name;
-    findingBooks();
+    //findingBooks();
   });
   form.on('error', function(err) {
     console.log('An error has occured: \n' + err);
+  });
+
+  form.on('end', function() {
+    res.json("upload successfully!");
   });
   // parse the incoming request containing the form data
   form.parse(req);
 });
 
+app.post('/uploadToGetHarrisDetector', function(req, res, next){ 
+  var form = new formidable.IncomingForm();
+  // store all uploads in the /uploads directory
+  form.uploadDir = path.join(__dirname, '/uploads/HarrisDetector');
+  form.on('file', function(field, file) {
+    fs.rename(file.path, path.join(form.uploadDir, file.name));
+    HarrisDetectorImageName = file.name;
+    //findingBooks();
+  });
+  form.on('error', function(err) {
+    console.log('An error has occured: \n' + err);
+  });
+
+  form.on('end', function() {
+    res.json("upload successfully!");
+  });
+  // parse the incoming request containing the form data
+  form.parse(req);
+});
 
 
 app.get('/removeFile', function(req, res, next) {
@@ -157,7 +180,6 @@ app.post('/getPointcloud', function(req, res, next){
 
 app.post('/getCorners', function(req, res, next){
   function getCorners(){
-    resultPLFile.hasResult = false;
     execFile("C:\\Program Files\\DetectCorners\\DetectCorners.exe", ["uploads/getCorners/" + cornersImageName,req.body.maxCorners, req.body.quality_level, req.body.min_distance, path.join(__dirname, "/output/corners.jpg")], {maxBuffer: 1024 * 1024 * 64}, (error, stdout, stderr) => {
       if (error) {
          res.status(500).send({ error: error });
@@ -172,8 +194,7 @@ app.post('/getCorners', function(req, res, next){
 
 app.post('/findingBooks', function(req, res, next){
   function findingBooks(){
-    resultPLFile.hasResult = false;
-      execFile("C:\\Program Files\\DetectCorners\\FindingBooks.exe", ["uploads/findingBooks/" + findingBooksImageName, path.join(__dirname, "/output/books.jpg")], {maxBuffer: 1024 * 1024 * 64}, (error, stdout, stderr) => {
+      execFile("C:\\Program Files\\DetectCorners\\FindingBooks.exe", ["uploads/findingBooks/" + findingBooksImageName, req.body.threshold, path.join(__dirname, "/output/books.jpg")], {maxBuffer: 1024 * 1024 * 64}, (error, stdout, stderr) => {
       if (error) {
          res.status(500).send({ error: error });
       }else{
@@ -183,6 +204,20 @@ app.post('/findingBooks', function(req, res, next){
     });
   }
   findingBooks();
+});
+
+app.post('/getHarrisDetector', function(req, res, next){
+  function getCorners(){
+      execFile("C:\\Program Files\\DetectCorners\\HarrisDetector.exe", ["uploads/HarrisDetector/" + HarrisDetectorImageName, req.body.threshold, path.join(__dirname, "/output/HarrisDetector.jpg")], {maxBuffer: 1024 * 1024 * 64}, (error, stdout, stderr) => {
+      if (error) {
+         res.status(500).send({ error: error });
+      }else{
+        res.json('HarrisDetector successfully');
+      }
+      console.log(stdout);
+    });
+  }
+  getCorners();
 });
 
 var server = app.listen(80, function(){
